@@ -1,0 +1,18 @@
+# Project exclude paths
+/.vscode/*
+/BigIntegerTest/*
+/build/*
+/CMakeFiles/*
+/src/BigInt.h.gch
+/src/Alltype.h.gch
+/temp/*
+/testData/*
+/Makefile
+/py_manual.pdf
+/test.py
+/code
+/details.md
+/CMakeCache.txt
+/*.cmake
+/*.Alltype
+/*.o
