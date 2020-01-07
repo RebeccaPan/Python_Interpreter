@@ -3,7 +3,7 @@
 #include "Alltype.h"
 
 #include <map>
-std::map<string, Alltype> varList;
+map<string, Alltype> varList;
 
 antlrcpp::Any EvalVisitor::visitFile_input(Python3Parser::File_inputContext *ctx) {
   return visitChildren(ctx);
@@ -45,8 +45,8 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
   if (ctx->testlist().size() == 1) return visitTestlist(ctx->testlist()[0]);
   if (ctx->augassign() != nullptr) {
     int op = visitAugassign(ctx->augassign()).as<int>();
-    std::vector<Alltype> lt = visitTestlist(ctx->testlist()[0]).as<std::vector<Alltype> >();
-    std::vector<Alltype> rt = visitTestlist(ctx->testlist()[1]).as<std::vector<Alltype> >();
+    vector<Alltype> lt = visitTestlist(ctx->testlist()[0]).as<vector<Alltype> >();
+    vector<Alltype> rt = visitTestlist(ctx->testlist()[1]).as<vector<Alltype> >();
     switch (op) {
     case 0:
       varList[lt[0].valName] = lt[0] + rt[0];
@@ -71,9 +71,9 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
   }
   if (ctx->ASSIGN().size() != 0) {
     int varNum = ctx->testlist().size();
-    std::vector<Alltype> allVal = visitTestlist(ctx->testlist()[varNum-1]).as<std::vector<Alltype> >();
+    vector<Alltype> allVal = visitTestlist(ctx->testlist()[varNum-1]).as<vector<Alltype> >();
     for (int i = 0; i < ctx->testlist().size()-1; ++i) {//for series "="s
-        std::vector<Alltype> tmpTest = visitTestlist(ctx->testlist(i)).as<std::vector<Alltype> >();
+        vector<Alltype> tmpTest = visitTestlist(ctx->testlist(i)).as<vector<Alltype> >();
         for (int j = 0; j < tmpTest.size(); ++j) {
           varList[tmpTest[j].valName] = allVal[j];
         }
@@ -92,9 +92,9 @@ antlrcpp::Any EvalVisitor::visitAugassign(Python3Parser::AugassignContext *ctx) 
 }
 
 antlrcpp::Any EvalVisitor::visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) {
-  if (ctx->break_stmt() != nullptr) return visitBreak_stmt(ctx->break_stmt()).as<Alltype>();
-  if (ctx->continue_stmt() != nullptr) return visitContinue_stmt(ctx->continue_stmt()).as<Alltype>();
-  if (ctx->return_stmt() != nullptr) return visitReturn_stmt(ctx->return_stmt()).as<Alltype>();
+  if (ctx->break_stmt() != nullptr) return visitBreak_stmt(ctx->break_stmt());
+  if (ctx->continue_stmt() != nullptr) return visitContinue_stmt(ctx->continue_stmt());
+  if (ctx->return_stmt() != nullptr) return visitReturn_stmt(ctx->return_stmt());
 }
 
 antlrcpp::Any EvalVisitor::visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) {
@@ -290,7 +290,7 @@ antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx) {
   if (ctx->NAME() != nullptr) {
     Alltype ans; ans.valName = ctx->NAME()->toString();
     if (varList.find(ans.valName) == varList.end()) {//notFound
-      varList.insert(std::pair<std::string, Alltype>(ans.valName, ans));
+      varList.insert(pair<string, Alltype>(ans.valName, ans));
       return ans;
     }
     else {//found
@@ -336,7 +336,7 @@ antlrcpp::Any EvalVisitor::visitArgument(Python3Parser::ArgumentContext *ctx) {
   if (ctx->NAME() == nullptr) return visitTest(ctx->test()).as<Alltype>();
   Alltype rt = visitTest(ctx->test()).as<Alltype>(); rt.valName = ctx->NAME()->toString();
   if (varList.find(rt.valName) == varList.end()) {//notFound
-    varList.insert(std::pair<std::string, Alltype>(rt.valName, rt));
+    varList.insert(pair<string, Alltype>(rt.valName, rt));
     return rt;
   }
   else {//found
