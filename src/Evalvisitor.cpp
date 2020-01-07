@@ -93,12 +93,14 @@ antlrcpp::Any EvalVisitor::visitAugassign(Python3Parser::AugassignContext *ctx) 
   if (ctx->DIV_ASSIGN()  != nullptr) return 3;// /=
   if (ctx->IDIV_ASSIGN() != nullptr) return 4;// //=
   if (ctx->MOD_ASSIGN()  != nullptr) return 5;// %=
+  return nullptr;
 }
 
 antlrcpp::Any EvalVisitor::visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) {
   if (ctx->break_stmt() != nullptr) return visitBreak_stmt(ctx->break_stmt());
   if (ctx->continue_stmt() != nullptr) return visitContinue_stmt(ctx->continue_stmt());
   if (ctx->return_stmt() != nullptr) return visitReturn_stmt(ctx->return_stmt());
+  return nullptr;
 }
 
 antlrcpp::Any EvalVisitor::visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) {
