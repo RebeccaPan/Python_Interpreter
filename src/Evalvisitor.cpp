@@ -45,8 +45,8 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
   if (ctx->testlist().size() == 1) return visitTestlist(ctx->testlist()[0]);
   if (ctx->augassign() != nullptr) {
     int op = visitAugassign(ctx->augassign()).as<int>();
-    vector<Alltype> lt = visitTestlist(ctx->testlist()[0]).as<vector<Alltype> >();
-    vector<Alltype> rt = visitTestlist(ctx->testlist()[1]).as<vector<Alltype> >();
+    std::vector<Alltype> lt = visitTestlist(ctx->testlist()[0]).as<std::vector<Alltype> >();
+    std::vector<Alltype> rt = visitTestlist(ctx->testlist()[1]).as<std::vector<Alltype> >();
     switch (op) {
     case 0:
       varList[lt[0].valName] = lt[0] + rt[0];
@@ -61,7 +61,7 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
       varList[lt[0].valName] = lt[0] / rt[0];
       break;
     case 4:
-      varList[lt[0].valName] = div(lt[0], rt[0]);//need fix
+      varList[lt[0].valName] = div(lt[0], rt[0]);
       break;
     case 5:
       varList[lt[0].valName] = lt[0] % rt[0];
@@ -71,9 +71,9 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
   }
   if (ctx->ASSIGN().size() != 0) {
     int varNum = ctx->testlist().size();
-    vector<Alltype> allVal = visitTestlist(ctx->testlist()[varNum-1]).as<vector<Alltype> >();
-    for (int i = 0; i < ctx->testlist().size()-1; ++i) {
-        vector<Alltype> tmpTest = visitTestlist(ctx->testlist(i)).as<vector<Alltype> >();
+    std::vector<Alltype> allVal = visitTestlist(ctx->testlist()[varNum-1]).as<std::vector<Alltype> >();
+    for (int i = 0; i < ctx->testlist().size()-1; ++i) {//for series "="s
+        std::vector<Alltype> tmpTest = visitTestlist(ctx->testlist(i)).as<std::vector<Alltype> >();
         for (int j = 0; j < tmpTest.size(); ++j) {
           varList[tmpTest[j].valName] = allVal[j];
         }
@@ -110,33 +110,26 @@ antlrcpp::Any EvalVisitor::visitReturn_stmt(Python3Parser::Return_stmtContext *c
 }
 
 antlrcpp::Any EvalVisitor::visitCompound_stmt(Python3Parser::Compound_stmtContext *ctx) {
-  if (ctx->if_stmt() != nullptr) return visitIf_stmt(ctx->if_stmt()).as<Alltype>();
-  if (ctx->while_stmt() != nullptr) return visitWhile_stmt(ctx->while_stmt()).as<Alltype>();
-  if (ctx->funcdef() != nullptr) return visitFuncdef(ctx->funcdef()).as<Alltype>();
+  if (ctx->if_stmt() != nullptr) return visitIf_stmt(ctx->if_stmt());
+  if (ctx->while_stmt() != nullptr) return visitWhile_stmt(ctx->while_stmt());
+  if (ctx->funcdef() != nullptr) return visitFuncdef(ctx->funcdef());
   return Alltype();
 }
 //if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
-//while_stmt: 'while' test ':' suite;
-//suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
 antlrcpp::Any EvalVisitor::visitIf_stmt(Python3Parser::If_stmtContext *ctx) {
-  bool cdt = (bool)visitTest(ctx->test()[0]).as<Alltype>();//condition
-  if (!cdt) {
-     if (ctx->ELSE() != nullptr) return visitSuite(ctx->suite()[ctx->suite().size()-1]);
-     else return nullptr;
+  for (int i = 0; i < ctx->test().size(); ++i) {
+    bool cdt = (bool)visitTest(ctx->test()[i]).as<Alltype>();
+    if (cdt) return visitSuite(ctx->suite()[i]);
   }
-  else {
-    for (int i = 0; i < ctx->ELIF().size(); ++i) {
-      cdt = (bool)visitTest(ctx->test()[i+1]).as<Alltype>();
-      if (cdt) return visitSuite(ctx->suite()[i+1]);
-    }
-  }
+  if (ctx->ELSE() != nullptr) return visitSuite(ctx->suite()[ctx->suite().size()-1]);
+  else return nullptr;
 }
 //while_stmt: 'while' test ':' suite;
 antlrcpp::Any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx) {
   bool cdt = (bool)visitTest(ctx->test()).as<Alltype>();
   while (cdt) {
     visitSuite(ctx->suite());
-    bool cdt = (bool)visitTest(ctx->test()).as<Alltype>();
+    cdt = (bool)visitTest(ctx->test()).as<Alltype>();
   }
   return nullptr;
 }
@@ -265,7 +258,6 @@ antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContext *ctx) 
   string funcName = ctx->atom()->NAME()->toString();
   if (funcName == "print") {
     if (ctx->trailer()->arglist() == nullptr) return Alltype();
-    //currentWorkPlace
     for (int i = 0; i < ctx->trailer()->arglist()->argument().size(); ++i) {
       if (i) cout << ' ';
       Alltype toBePrinted = visitArgument(ctx->trailer()->arglist()->argument()[i]).as<Alltype>();
