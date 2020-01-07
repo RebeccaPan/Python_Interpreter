@@ -42,7 +42,7 @@ antlrcpp::Any EvalVisitor::visitSimple_stmt(Python3Parser::Simple_stmtContext *c
 antlrcpp::Any EvalVisitor::visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) {
   if (ctx->expr_stmt() != nullptr) return visitExpr_stmt(ctx->expr_stmt());
   if (ctx->flow_stmt() != nullptr) return visitFlow_stmt(ctx->flow_stmt());
-  return Alltype();
+  return nullptr;
 }
 
 antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) {
@@ -71,7 +71,7 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
       varList[lt[0].valName] = lt[0] % rt[0];
       break;
     }
-    return Alltype();
+    return nullptr;
   }
   if (ctx->ASSIGN().size() != 0) {
     int varNum = ctx->testlist().size();
@@ -82,7 +82,7 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
           varList[tmpTest[j].valName] = allVal[j];
         }
     }
-    return Alltype();
+    return nullptr;
   }
 }
 
@@ -136,7 +136,7 @@ antlrcpp::Any EvalVisitor::visitIf_stmt(Python3Parser::If_stmtContext *ctx) {
   if (ctx->ELSE() != nullptr) return visitSuite(ctx->suite()[ctx->suite().size()-1]);
   else return nullptr;
 }
-//while_stmt: 'while' test ':' suite;
+
 antlrcpp::Any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx) {
   bool cdt = (bool)visitTest(ctx->test()).as<Alltype>();
   while (cdt) {
@@ -144,24 +144,24 @@ antlrcpp::Any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx
     flowStat.push_back(dfault);
     visitSuite(ctx->suite());
     cdt = (bool)visitTest(ctx->test()).as<Alltype>();
-    if (flowStat[flowStat.size()-1].bk == 1) {flowStat.pop_back(); break;}
-    if (flowStat[flowStat.size()-1].ct == 1) {flowStat.pop_back(); continue;}
-    if (flowStat[flowStat.size()-1].rt == 1) {flowStat.pop_back(); break;}
+    if (flowStat[flowStat.size()-1].bk) {flowStat.pop_back(); break;}
+    if (flowStat[flowStat.size()-1].ct) {flowStat.pop_back(); continue;}
+    if (flowStat[flowStat.size()-1].rt) {flowStat.pop_back(); break;}
     flowStat.pop_back();
   }
   return nullptr;
 }
-//suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
+
 antlrcpp::Any EvalVisitor::visitSuite(Python3Parser::SuiteContext *ctx) {
-  if (flowStat[flowStat.size()-1].bk == 1) return nullptr;
-  if (flowStat[flowStat.size()-1].ct == 1) return nullptr;
-  if (flowStat[flowStat.size()-1].rt == 1) return nullptr;
+  if (flowStat[flowStat.size()-1].bk) return nullptr;
+  if (flowStat[flowStat.size()-1].ct) return nullptr;
+  if (flowStat[flowStat.size()-1].rt) return nullptr;
   if (ctx->simple_stmt() != nullptr) return visitSimple_stmt(ctx->simple_stmt());
   else {
     for (int i = 0; i < ctx->stmt().size(); ++i) {
-      if (flowStat[flowStat.size()-1].bk == 1) return nullptr;
-      if (flowStat[flowStat.size()-1].ct == 1) return nullptr;
-      if (flowStat[flowStat.size()-1].rt == 1) return nullptr;
+      if (flowStat[flowStat.size()-1].bk) return nullptr;
+      if (flowStat[flowStat.size()-1].ct) return nullptr;
+      if (flowStat[flowStat.size()-1].rt) return nullptr;
       visitStmt(ctx->stmt()[i]);
     }
   }
