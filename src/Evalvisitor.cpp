@@ -2,11 +2,7 @@
 #include "BigInt.h"
 #include "Alltype.h"
 
-#include <vector>
 #include <map>
-
-struct triple{int bk, ct, rt;};
-vector<triple> flowStat;
 map<string, Alltype> varList;
 
 antlrcpp::Any EvalVisitor::visitFile_input(Python3Parser::File_inputContext *ctx) {
@@ -42,7 +38,7 @@ antlrcpp::Any EvalVisitor::visitSimple_stmt(Python3Parser::Simple_stmtContext *c
 antlrcpp::Any EvalVisitor::visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) {
   if (ctx->expr_stmt() != nullptr) return visitExpr_stmt(ctx->expr_stmt());
   if (ctx->flow_stmt() != nullptr) return visitFlow_stmt(ctx->flow_stmt());
-  return nullptr;
+  return Alltype();
 }
 
 antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) {
@@ -71,7 +67,7 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
       varList[lt[0].valName] = lt[0] % rt[0];
       break;
     }
-    return nullptr;
+    return Alltype();
   }
   if (ctx->ASSIGN().size() != 0) {
     int varNum = ctx->testlist().size();
@@ -82,7 +78,7 @@ antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
           varList[tmpTest[j].valName] = allVal[j];
         }
     }
-    return nullptr;
+    return Alltype();
   }
 }
 
@@ -93,32 +89,24 @@ antlrcpp::Any EvalVisitor::visitAugassign(Python3Parser::AugassignContext *ctx) 
   if (ctx->DIV_ASSIGN()  != nullptr) return 3;// /=
   if (ctx->IDIV_ASSIGN() != nullptr) return 4;// //=
   if (ctx->MOD_ASSIGN()  != nullptr) return 5;// %=
-  return nullptr;
 }
 
 antlrcpp::Any EvalVisitor::visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) {
   if (ctx->break_stmt() != nullptr) return visitBreak_stmt(ctx->break_stmt());
   if (ctx->continue_stmt() != nullptr) return visitContinue_stmt(ctx->continue_stmt());
   if (ctx->return_stmt() != nullptr) return visitReturn_stmt(ctx->return_stmt());
-  return nullptr;
 }
 
 antlrcpp::Any EvalVisitor::visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) {
-  if (ctx->BREAK() != nullptr) flowStat[flowStat.size()-1].bk = 1;
-  else flowStat[flowStat.size()-1].bk = 0;
-  return nullptr;
+  return visitChildren(ctx);
 }
 
 antlrcpp::Any EvalVisitor::visitContinue_stmt(Python3Parser::Continue_stmtContext *ctx) {
-  if (ctx->CONTINUE() != nullptr) flowStat[flowStat.size()-1].ct = 1;
-  else flowStat[flowStat.size()-1].ct = 0;
-  return nullptr;
+  return visitChildren(ctx);
 }
 
 antlrcpp::Any EvalVisitor::visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) {
-  if (ctx->RETURN() != nullptr) flowStat[flowStat.size()-1].rt = 1;//need fix
-  else flowStat[flowStat.size()-1].rt = 1;
-  return nullptr;//need fix
+  return visitChildren(ctx);
 }
 
 antlrcpp::Any EvalVisitor::visitCompound_stmt(Python3Parser::Compound_stmtContext *ctx) {
@@ -127,7 +115,7 @@ antlrcpp::Any EvalVisitor::visitCompound_stmt(Python3Parser::Compound_stmtContex
   if (ctx->funcdef() != nullptr) return visitFuncdef(ctx->funcdef());
   return Alltype();
 }
-
+//if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
 antlrcpp::Any EvalVisitor::visitIf_stmt(Python3Parser::If_stmtContext *ctx) {
   for (int i = 0; i < ctx->test().size(); ++i) {
     bool cdt = (bool)visitTest(ctx->test()[i]).as<Alltype>();
@@ -136,32 +124,20 @@ antlrcpp::Any EvalVisitor::visitIf_stmt(Python3Parser::If_stmtContext *ctx) {
   if (ctx->ELSE() != nullptr) return visitSuite(ctx->suite()[ctx->suite().size()-1]);
   else return nullptr;
 }
-
+//while_stmt: 'while' test ':' suite;
 antlrcpp::Any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx) {
   bool cdt = (bool)visitTest(ctx->test()).as<Alltype>();
   while (cdt) {
-    triple dfault; dfault.bk = dfault.ct = dfault.rt = 0;
-    flowStat.push_back(dfault);
     visitSuite(ctx->suite());
     cdt = (bool)visitTest(ctx->test()).as<Alltype>();
-    if (flowStat[flowStat.size()-1].bk) {flowStat.pop_back(); break;}
-    if (flowStat[flowStat.size()-1].ct) {flowStat.pop_back(); continue;}
-    if (flowStat[flowStat.size()-1].rt) {flowStat.pop_back(); break;}
-    flowStat.pop_back();
   }
   return nullptr;
 }
-
+//suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
 antlrcpp::Any EvalVisitor::visitSuite(Python3Parser::SuiteContext *ctx) {
-  if (flowStat[flowStat.size()-1].bk) return nullptr;
-  if (flowStat[flowStat.size()-1].ct) return nullptr;
-  if (flowStat[flowStat.size()-1].rt) return nullptr;
   if (ctx->simple_stmt() != nullptr) return visitSimple_stmt(ctx->simple_stmt());
   else {
     for (int i = 0; i < ctx->stmt().size(); ++i) {
-      if (flowStat[flowStat.size()-1].bk) return nullptr;
-      if (flowStat[flowStat.size()-1].ct) return nullptr;
-      if (flowStat[flowStat.size()-1].rt) return nullptr;
       visitStmt(ctx->stmt()[i]);
     }
   }

@@ -6,6 +6,7 @@
 /src/BigInt.h.gch
 /src/Alltype.h.gch
 /src/main_backup.txt
+/src/_Evalvisitor.cpp
 /temp/*
 /testData/*
 /Makefile
