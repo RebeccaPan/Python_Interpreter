@@ -23,6 +23,7 @@ class Alltype {
     friend Alltype operator-(const Alltype &a, const Alltype &b);
     friend Alltype operator*(const Alltype &a, const Alltype &b);
     friend Alltype operator/(const Alltype &a, const Alltype &b);
+    friend Alltype div(const Alltype &a, const Alltype &b);
     friend Alltype operator%(const Alltype &a, const Alltype &b);
 
     //moreOperators
@@ -43,7 +44,8 @@ class Alltype {
         string valName;
         //construction x 5
         //change void/bool/bigint/double/string into alltype
-        explicit Alltype():type(VOID), vBool(), vBigInt(), vDouble(), vString(), valName() {}
+        //need fix
+        explicit Alltype():type(VOID), vBool(), vBigInt(), vDouble(), vString(), valName("") {}
         explicit Alltype(const bool &_vBool):type(BOOL), vBool(_vBool), vBigInt(), vDouble(), vString(), valName() {}
         explicit Alltype(const BigInt &_vBigInt):type(BIGINT), vBool(), vBigInt(_vBigInt), vDouble(), vString(), valName() {}
         explicit Alltype(const double &_vDouble):type(DOUBLE), vBool(), vBigInt(), vDouble(_vDouble), vString(), valName() {}
@@ -57,10 +59,17 @@ class Alltype {
         explicit operator string() const;
         
         //operators
-        //Alltype operator-(const Alltype &a) {return *this = Alltype(BigInt(0, 0)) - *this;}
-
+        Alltype &operator=(const Alltype &a) {
+            if (this == &a) return *this;
+            type = a.type;
+            vBool = a.vBool;
+            vBigInt = a.vBigInt;
+            vDouble = a.vDouble;
+            vString = a.vString;
+            return *this;
+        }
         Alltype operator&=(const Alltype &a) {return *this = *this && a;}
-        Alltype operator|=(const Alltype &a) {return *this = *this || a;}
+        Alltype operator|=(const Alltype &a) {return *this = Alltype(*this || a);}
 
         Alltype operator+=(const Alltype &a) {return *this = *this + a;}
         Alltype operator-=(const Alltype &a) {return *this = *this - a;}

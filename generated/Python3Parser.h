@@ -346,7 +346,7 @@ public:
   };
 
   Compound_stmtContext* compound_stmt();
-
+//currentWorkPlace
   class  If_stmtContext : public antlr4::ParserRuleContext {
   public:
     If_stmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -635,7 +635,7 @@ public:
   };
 
   TrailerContext* trailer();
-//currentWorkPlace
+
   class  AtomContext : public antlr4::ParserRuleContext {
   public:
     AtomContext(antlr4::ParserRuleContext *parent, size_t invokingState);

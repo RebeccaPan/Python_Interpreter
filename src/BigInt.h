@@ -48,18 +48,6 @@ class BigInt {
             }
             checkZero();
         }
-        /*Bigint(const int &num = 0) {
-            cout << "H\n";
-            if (num <  0) sgn = -1;
-            if (num == 0) sgn = 0;
-            if (num >  0) sgn = 1;
-            int _num = num;
-            while (_num) {
-                n.push_back(_num % 10);
-                _num /= 10;
-            }
-            checkZero();
-        }*/
         explicit BigInt(const bool &vbool);
         explicit BigInt(const double &vDouble);
         explicit BigInt(const string &vString);

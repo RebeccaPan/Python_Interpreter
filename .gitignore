@@ -5,6 +5,7 @@
 /CMakeFiles/*
 /src/BigInt.h.gch
 /src/Alltype.h.gch
+/src/main_backup.txt
 /temp/*
 /testData/*
 /Makefile

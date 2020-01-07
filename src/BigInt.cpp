@@ -119,7 +119,7 @@ BigInt operator/(const BigInt &a, const BigInt &b) {
     if (a.sgn == b.sgn) ans.sgn = 1; else ans.sgn = -1;
 
     //check sgn
-    if (b.sgn == 0) {cout << "RE: divisor is zero."; return zero;}
+    if (b.sgn == 0) {cerr << "RE: divisor is zero."; return zero;}
     if (a.sgn == 0) return zero;
     if (a < b) {
         if (ans.sgn == 1) return zero;

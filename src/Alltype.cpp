@@ -57,7 +57,7 @@ Alltype operator+(const Alltype &a, const Alltype &b) {//haven't been checked
             cerr << "ERROR: Any ADD_OP between a numeric type and a STRING is illegal.\n";
             return Alltype();
         }
-        return Alltype(a + b);
+        return Alltype((string)a + (string)b);
     }
     return Alltype();
 }
@@ -108,7 +108,7 @@ Alltype operator*(const Alltype &a, const Alltype &b) {//haven't been checked
                 return Alltype();
             }
             string str = "";
-            for (BigInt i(1, 1); i <= (BigInt)b; i = i + 1) str = str + (string)a;
+            for (BigInt i(1, 1); i <= (BigInt)b; i = i + BigInt(1, 1)) str = str + (string)a;
             return Alltype(str);
         }
         else {
@@ -136,9 +136,31 @@ Alltype operator/(const Alltype &a, const Alltype &b) {
     case Alltype::BOOL:
         return Alltype(BigInt(a) / BigInt(b));
     case Alltype::BIGINT:
-        return Alltype(BigInt(a) / BigInt(b));//is "1/3" 0 or (double)0.333? need fix
+        return Alltype((double)a / (double)b);
     case Alltype::DOUBLE:
         return Alltype((double)a / (double)b);
+    case Alltype::STRING:
+        cerr << "ERROR: DIV_OP is meaningless with regard to STRING";
+        break;
+    }
+    return Alltype();
+}
+
+Alltype div(const Alltype &a, const Alltype &b) {
+    if (!a.type || !b.type) {
+        cerr << "ERROR: Any DIV_OP between VOID and other types is illegal.\n";
+        return Alltype();
+    }
+    int maxType = (a.type > b.type)?(a.type):(b.type);
+    Alltype ans;
+    switch (maxType) {
+    case Alltype::BOOL:
+        return Alltype(BigInt(a) / BigInt(b));
+    case Alltype::BIGINT:
+        return Alltype(BigInt(a) / BigInt(b));
+        break;
+    case Alltype::DOUBLE:
+        return Alltype(BigInt((double)a / (double)b));
     case Alltype::STRING:
         cerr << "ERROR: DIV_OP is meaningless with regard to STRING";
         break;
@@ -176,7 +198,7 @@ ostream& operator<<(ostream &os, const Alltype& a) {
         break;
     }
     case Alltype::BIGINT: os << a.vBigInt; break;
-    case Alltype::DOUBLE: os << a.vDouble; break;//accuracy loss; need fix
+    case Alltype::DOUBLE: os << to_string(a.vDouble); break;
     case Alltype::STRING: os << a.vString; break;
     }
     return os;
