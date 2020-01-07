@@ -268,7 +268,9 @@ antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContext *ctx) 
     //currentWorkPlace
     for (int i = 0; i < ctx->trailer()->arglist()->argument().size(); ++i) {
       if (i) cout << ' ';
-      cout << visitArgument(ctx->trailer()->arglist()->argument()[i]).as<Alltype>();
+      Alltype toBePrinted = visitArgument(ctx->trailer()->arglist()->argument()[i]).as<Alltype>();
+      if (toBePrinted.isVoid()) cout << "None";
+      else cout << toBePrinted;
     }
     cout << endl;
     return Alltype();

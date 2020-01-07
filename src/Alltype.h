@@ -57,7 +57,9 @@ class Alltype {
         explicit operator BigInt() const;
         explicit operator double() const;
         explicit operator string() const;
-        
+
+        bool isVoid() {return type == 0;}
+
         //operators
         Alltype &operator=(const Alltype &a) {
             if (this == &a) return *this;

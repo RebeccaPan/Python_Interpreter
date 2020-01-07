@@ -262,8 +262,8 @@ Alltype::operator string() const {
         cerr << "ERROR: Any attempt to convert VOID into other types is doomed to fail.\n";
         break;
     case BOOL:
-        if (vBool) return "1";
-        else return "0";
+        if (vBool) return "True";
+        else return "False";
     case BIGINT:
         return (string)vBigInt;
     case DOUBLE:

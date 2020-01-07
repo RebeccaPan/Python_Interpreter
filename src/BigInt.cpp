@@ -116,11 +116,12 @@ BigInt operator*(const BigInt &a, const BigInt &b) {
 BigInt operator/(const BigInt &a, const BigInt &b) {
     BigInt zero(0, 0), minusOne(-1, 1);
     BigInt ans;
-    if (a.sgn == b.sgn) ans.sgn = 1; else ans.sgn = -1;
 
     //check sgn
     if (b.sgn == 0) {cerr << "RE: divisor is zero."; return zero;}
     if (a.sgn == 0) return zero;
+
+    if (a.sgn == b.sgn) ans.sgn = 1; else ans.sgn = -1;
     if (a < b) {
         if (ans.sgn == 1) return zero;
         if (ans.sgn == -1) return minusOne;
